@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Swisscom AI Concierge — Technical Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #001155;
+  --blue: #0039A6;
+  --light-blue: #4A7FD4;
+  --accent: #00D4AA;
+  --warm: #FF6B35;
+  --red: #DC2626;
+  --green: #059669;
+  --purple: #7C3AED;
+  --amber: #D97706;
+  --s0: #F7F8FA;
+  --s1: #FFFFFF;
+  --s2: #EEF1F6;
+  --s3: #DDE3ED;
+  --t1: #0A1628;
+  --t2: #5A6578;
+  --t3: #8C95A6;
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --sh-sm: 0 1px 3px rgba(0,17,85,0.06);
+  --sh-md: 0 4px 16px rgba(0,17,85,0.08);
+  --sh-lg: 0 8px 32px rgba(0,17,85,0.12);
+  --sh-glow: 0 0 40px rgba(0,212,170,0.15);
+  --font: 'Instrument Sans', -apple-system, sans-serif;
+  --mono: 'DM Mono', monospace;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font); background: #E8EBF0; color: var(--t1); min-height:100vh; overflow-x:hidden; -webkit-font-smoothing: antialiased; }
+
+/* ─── APP SHELL ─── */
+.shell { max-width:430px; margin:0 auto; min-height:100vh; background:var(--s1); position:relative; box-shadow: 0 0 60px rgba(0,17,85,0.12); display:flex; flex-direction:column; overflow:hidden; }
+
+/* ─── HEADER ─── */
+.hdr { padding:12px 16px; display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.92); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-bottom:1px solid var(--s2); position:sticky; top:0; z-index:100; }
+.hdr-l { display:flex; align-items:center; gap:10px; }
+.hdr-r { display:flex; gap:6px; }
+.btn-back { width:34px; height:34px; border-radius:var(--r-sm); border:1px solid var(--s3); background:var(--s1); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .2s; color:var(--t2); }
+.btn-back:hover { background:var(--s2); }
+.btn-back.hide { opacity:0; pointer-events:none; }
+.hdr-info {}
+.hdr-title { font-size:14px; font-weight:600; color:var(--t1); line-height:1.2; }
+.hdr-sub { font-size:10px; font-weight:600; color:var(--accent); letter-spacing:.6px; text-transform:uppercase; }
+.btn-icon { width:34px; height:34px; border-radius:var(--r-sm); border:none; background:transparent; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--t2); transition:all .2s; }
+.btn-icon:hover { background:var(--s2); }
+
+/* ─── MAIN ─── */
+.main { flex:1; overflow-y:auto; overflow-x:hidden; scroll-behavior:smooth; padding-bottom:90px; }
+
+/* ─── SCREENS ─── */
+.scr { display:none; }
+.scr.on { display:block; animation: scrIn .4s cubic-bezier(.16,1,.3,1); }
+@keyframes scrIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+/* ─── HERO ─── */
+.hero { padding:28px 20px 24px; background:linear-gradient(160deg, var(--navy) 0%, #001D66 50%, var(--blue) 100%); position:relative; overflow:hidden; }
+.hero::before { content:''; position:absolute; top:-80px; right:-60px; width:250px; height:250px; border-radius:50%; background:radial-gradient(circle, rgba(0,212,170,.1) 0%, transparent 70%); }
+.hero::after { content:''; position:absolute; bottom:-60px; left:-40px; width:200px; height:200px; border-radius:50%; background:radial-gradient(circle, rgba(74,127,212,.12) 0%, transparent 70%); }
+.hero-grid { display:grid; grid-template-columns:1fr auto; gap:16px; position:relative; z-index:1; }
+.greet { font-size:24px; font-weight:700; color:#fff; line-height:1.2; }
+.greet-sub { font-size:13px; color:rgba(255,255,255,.6); margin-top:4px; line-height:1.5; }
+.avatar-ring { width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg, var(--accent), #00B894); display:flex; align-items:center; justify-content:center; position:relative; }
+.avatar-ring svg { width:26px; height:26px; color:var(--navy); }
+.avatar-pulse { position:absolute; bottom:2px; right:2px; width:10px; height:10px; border-radius:50%; background:var(--accent); border:2px solid var(--navy); animation:pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.3);} }
+
+/* ─── DETECTED ISSUE ─── */
+.detect { margin:16px 16px 0; padding:14px; border-radius:var(--r-md); background:linear-gradient(135deg, #FFF8F3, #FFF0E6); border:1px solid rgba(255,107,53,.18); cursor:pointer; transition:all .25s; }
+.detect:hover { box-shadow:0 4px 16px rgba(255,107,53,.1); transform:translateY(-1px); }
+.detect-top { display:flex; align-items:center; gap:10px; }
+.detect-ico { width:30px; height:30px; border-radius:8px; background:rgba(255,107,53,.1); display:flex; align-items:center; justify-content:center; color:var(--warm); flex-shrink:0; }
+.detect-title { font-size:13px; font-weight:600; color:var(--t1); }
+.detect-desc { font-size:12px; color:var(--t2); line-height:1.45; margin-top:6px; margin-left:40px; }
+.detect-cta { margin-left:40px; margin-top:8px; font-size:11px; font-weight:600; color:var(--warm); display:flex; align-items:center; gap:3px; }
+
+/* ─── SMART INPUT ─── */
+.sinput { padding:16px 16px 0; }
+.sinput-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.8px; color:var(--t3); margin-bottom:8px; }
+.sinput-wrap { position:relative; }
+.sinput-field { width:100%; padding:12px 44px 12px 14px; border-radius:var(--r-md); border:1.5px solid var(--s3); background:var(--s1); font-family:var(--font); font-size:14px; color:var(--t1); outline:none; transition:all .25s; }
+.sinput-field::placeholder { color:var(--t3); }
+.sinput-field:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(0,57,166,.08); }
+.sinput-btn { position:absolute; right:5px; top:50%; transform:translateY(-50%); width:34px; height:34px; border-radius:var(--r-sm); background:var(--navy); border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .2s; }
+.sinput-btn:hover { background:var(--blue); }
+.sinput-btn svg { color:#fff; width:16px; height:16px; }
+.sinput-hints { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+.sinput-hint { padding:5px 10px; border-radius:100px; border:1px solid var(--s3); background:var(--s1); font-family:var(--font); font-size:11px; color:var(--t2); cursor:pointer; transition:all .2s; white-space:nowrap; }
+.sinput-hint:hover { border-color:var(--light-blue); color:var(--blue); background:rgba(0,57,166,.03); }
+
+/* ─── SECTION LABELS ─── */
+.sec-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.8px; color:var(--t3); padding:20px 16px 8px; }
+
+/* ─── PRODUCT CARDS ─── */
+.prod-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:0 16px; }
+.prod { padding:14px 12px; border-radius:var(--r-md); border:1.5px solid var(--s2); background:var(--s1); cursor:pointer; transition:all .25s cubic-bezier(.16,1,.3,1); position:relative; overflow:hidden; }
+.prod:hover { border-color:var(--light-blue); box-shadow:var(--sh-md); transform:translateY(-1px); }
+.prod:active { transform:translateY(0) scale(.98); }
+.prod-ico { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
+.prod-ico svg { width:20px; height:20px; }
+.prod-ico.inet { background:#E8F4FD; color:var(--blue); }
+.prod-ico.tv { background:#F0E8FD; color:var(--purple); }
+.prod-ico.mob { background:#E8FDF4; color:var(--green); }
+.prod-ico.land { background:#FDF4E8; color:var(--amber); }
+.prod-name { font-size:13px; font-weight:600; color:var(--t1); }
+.prod-plan { font-size:11px; color:var(--t3); margin-top:1px; }
+.prod-status { display:flex; align-items:center; gap:4px; margin-top:6px; }
+.status-dot { width:6px; height:6px; border-radius:50%; }
+.status-dot.ok { background:var(--green); }
+.status-dot.warn { background:var(--warm); animation:pulse 2s ease-in-out infinite; }
+.status-dot.down { background:var(--red); }
+.status-text { font-size:10px; font-weight:500; color:var(--t3); }
+.prod-badge { position:absolute; top:10px; right:10px; width:7px; height:7px; border-radius:50%; background:var(--warm); box-shadow:0 0 0 3px rgba(255,107,53,.15); }
+
+/* ─── QUICK ACTIONS ─── */
+.qactions { display:flex; gap:8px; padding:0 16px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.qactions::-webkit-scrollbar { display:none; }
+.qaction { padding:10px 14px; border-radius:var(--r-md); border:1.5px solid var(--s2); background:var(--s1); cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:8px; white-space:nowrap; flex-shrink:0; }
+.qaction:hover { border-color:var(--light-blue); box-shadow:var(--sh-sm); }
+.qaction-ico { font-size:16px; }
+.qaction-text { font-size:12px; font-weight:600; color:var(--t1); }
+.qaction-sub { font-size:10px; color:var(--t3); }
+
+/* ─── HUMAN ESCALATION ─── */
+.escalate { margin:16px; padding:12px 14px; border-radius:var(--r-md); background:var(--s0); border:1px solid var(--s3); display:flex; align-items:center; gap:10px; cursor:pointer; transition:all .2s; }
+.escalate:hover { background:var(--s2); }
+.escalate-ico { width:34px; height:34px; border-radius:var(--r-sm); background:var(--s2); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.escalate-text { flex:1; }
+.escalate-title { font-size:12px; font-weight:600; color:var(--t1); }
+.escalate-desc { font-size:10px; color:var(--t3); }
+
+/* ─── PROGRESS ─── */
+.prog { height:3px; background:var(--s2); }
+.prog-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--light-blue)); border-radius:0 3px 3px 0; transition:width .6s cubic-bezier(.16,1,.3,1); }
+
+/* ─── FLOW HEADER ─── */
+.fhdr { padding:20px 16px 16px; border-bottom:1px solid var(--s2); }
+.crumbs { display:flex; align-items:center; gap:4px; margin-bottom:8px; flex-wrap:wrap; }
+.crumb { font-size:10px; font-weight:500; color:var(--t3); text-transform:uppercase; letter-spacing:.3px; }
+.crumb.act { color:var(--blue); }
+.crumb-sep { font-size:9px; color:var(--t3); }
+.fhdr-title { font-size:20px; font-weight:700; color:var(--t1); line-height:1.2; }
+.fhdr-sub { font-size:13px; color:var(--t2); margin-top:3px; line-height:1.45; }
+
+/* ─── OPTION CARDS ─── */
+.opts { padding:16px; display:flex; flex-direction:column; gap:8px; }
+.opt { padding:14px; border-radius:var(--r-md); border:1.5px solid var(--s2); background:var(--s1); cursor:pointer; transition:all .25s cubic-bezier(.16,1,.3,1); display:flex; align-items:center; gap:12px; }
+.opt:hover { border-color:var(--light-blue); box-shadow:var(--sh-md); transform:translateY(-1px); }
+.opt:active { transform:scale(.98); }
+.opt.sel { border-color:var(--blue); background:rgba(0,57,166,.02); box-shadow:0 0 0 3px rgba(0,57,166,.06); }
+.opt-emoji { width:40px; height:40px; border-radius:10px; background:var(--s2); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.opt-body { flex:1; min-width:0; }
+.opt-title { font-size:13px; font-weight:600; color:var(--t1); }
+.opt-desc { font-size:11px; color:var(--t2); line-height:1.4; margin-top:1px; }
+.opt-arrow { color:var(--t3); flex-shrink:0; transition:transform .2s; }
+.opt:hover .opt-arrow { transform:translateX(3px); }
+
+/* ─── MODE TOGGLE ─── */
+.modes { display:flex; gap:3px; padding:3px; background:var(--s0); border-radius:100px; margin:12px 16px 0; }
+.mode-btn { flex:1; padding:7px 10px; border-radius:100px; border:none; background:transparent; font-family:var(--font); font-size:11px; font-weight:600; color:var(--t3); cursor:pointer; transition:all .25s; display:flex; align-items:center; justify-content:center; gap:5px; }
+.mode-btn.on { background:var(--s1); color:var(--t1); box-shadow:var(--sh-sm); }
+
+/* ─── DIAGNOSTIC ─── */
+.diag { padding:16px; }
+.diag-card { padding:16px; border-radius:var(--r-lg); background:linear-gradient(160deg, var(--navy), #001D66); color:#fff; position:relative; overflow:hidden; margin-bottom:14px; }
+.diag-card::after { content:''; position:absolute; top:-50%; right:-30%; width:180px; height:180px; border-radius:50%; background:radial-gradient(circle, rgba(0,212,170,.12) 0%, transparent 70%); }
+.diag-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.8px; color:rgba(255,255,255,.45); margin-bottom:6px; position:relative; z-index:1; }
+.diag-title { font-size:16px; font-weight:700; position:relative; z-index:1; }
+.diag-desc { font-size:12px; color:rgba(255,255,255,.6); margin-top:2px; position:relative; z-index:1; }
+.diag-spin { display:flex; align-items:center; gap:8px; margin-top:12px; position:relative; z-index:1; }
+.spinner { width:18px; height:18px; border:2.5px solid rgba(255,255,255,.2); border-top-color:var(--accent); border-radius:50%; animation:spin 1s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg);} }
+.diag-spin-text { font-size:11px; font-weight:500; color:rgba(255,255,255,.65); font-family:var(--mono); }
+
+/* ─── CHECK LIST ─── */
+.checks { display:flex; flex-direction:column; gap:6px; }
+.chk { display:flex; align-items:center; gap:10px; padding:11px 12px; border-radius:var(--r-sm); background:var(--s0); opacity:0; animation:chkIn .4s cubic-bezier(.16,1,.3,1) forwards; }
+.chk:nth-child(1){animation-delay:.05s} .chk:nth-child(2){animation-delay:.15s} .chk:nth-child(3){animation-delay:.25s} .chk:nth-child(4){animation-delay:.35s} .chk:nth-child(5){animation-delay:.45s} .chk:nth-child(6){animation-delay:.55s}
+@keyframes chkIn { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:translateX(0)} }
+.chk-ico { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.chk-ico.pass { background:#ECFDF5; color:var(--green); }
+.chk-ico.fail { background:#FEF2F2; color:var(--red); }
+.chk-ico.pend { background:var(--s2); color:var(--t3); }
+.chk-ico.pend .spinner { width:14px; height:14px; border-width:2px; border-color:var(--s3); border-top-color:var(--t3); }
+.chk-label { flex:1; font-size:12px; font-weight:500; color:var(--t1); }
+.chk-val { font-size:11px; font-weight:500; font-family:var(--mono); }
+.chk-val.pass { color:var(--green); }
+.chk-val.fail { color:var(--red); }
+.chk-val.pend { color:var(--t3); }
+
+/* ─── AI INSIGHT ─── */
+.insight { margin:14px 16px 0; padding:14px; border-radius:var(--r-md); background:linear-gradient(135deg, #F0FDF9, #ECFEF7); border:1px solid rgba(0,212,170,.18); }
+.insight.warn { background:linear-gradient(135deg, #FFF8F3, #FFF0E6); border-color:rgba(255,107,53,.18); }
+.insight-badge { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--accent); background:rgba(0,212,170,.1); padding:2px 7px; border-radius:5px; display:inline-block; margin-bottom:8px; }
+.insight.warn .insight-badge { color:var(--warm); background:rgba(255,107,53,.1); }
+.insight-text { font-size:13px; color:var(--t1); line-height:1.55; }
+.insight-text strong { color:var(--navy); }
+
+/* ─── ACTION BUTTONS ─── */
+.actions { padding:16px; display:flex; flex-direction:column; gap:8px; }
+.abtn { width:100%; padding:13px; border-radius:var(--r-md); border:none; font-family:var(--font); font-size:14px; font-weight:600; cursor:pointer; transition:all .25s; display:flex; align-items:center; justify-content:center; gap:7px; }
+.abtn.pri { background:var(--navy); color:#fff; }
+.abtn.pri:hover { background:var(--blue); box-shadow:var(--sh-md); }
+.abtn.acc { background:linear-gradient(135deg, var(--accent), #00B894); color:var(--navy); }
+.abtn.acc:hover { box-shadow:var(--sh-glow); transform:translateY(-1px); }
+.abtn.sec { background:var(--s0); color:var(--t1); border:1.5px solid var(--s3); }
+.abtn.sec:hover { background:var(--s2); }
+.abtn.gho { background:transparent; color:var(--t2); }
+
+/* ─── REPAIR CARD ─── */
+.repair { margin:0 16px; padding:16px; border-radius:var(--r-lg); border:1.5px solid var(--s2); background:var(--s1); }
+.repair-hdr { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.repair-ico { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.repair-ico.wifi { background:linear-gradient(135deg,#FEF3C7,#FDE68A); }
+.repair-ico.restart { background:linear-gradient(135deg,#DBEAFE,#BFDBFE); }
+.repair-ico.update { background:linear-gradient(135deg,#E0E7FF,#C7D2FE); }
+.repair-ico.config { background:linear-gradient(135deg,#D1FAE5,#A7F3D0); }
+.repair-title { font-size:14px; font-weight:700; color:var(--t1); }
+.repair-desc { font-size:11px; color:var(--t2); }
+.repair-steps { display:flex; flex-direction:column; margin-bottom:14px; }
+.rstep { display:flex; gap:10px; padding:8px 0; position:relative; }
+.rstep:not(:last-child)::after { content:''; position:absolute; left:12px; top:32px; bottom:0; width:1.5px; background:var(--s3); }
+.snum { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; z-index:1; }
+.snum.done { background:var(--accent); color:var(--navy); }
+.snum.act { background:var(--navy); color:#fff; box-shadow:0 0 0 3px rgba(0,17,85,.08); }
+.snum.wait { background:var(--s2); color:var(--t3); }
+.scontent { padding-top:2px; }
+.stitle { font-size:12px; font-weight:600; color:var(--t1); }
+.sdetail { font-size:11px; color:var(--t2); margin-top:1px; }
+
+/* ─── SUCCESS ─── */
+.success { padding:40px 16px 16px; text-align:center; }
+.success-ring { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,#ECFDF5,#D1FAE5); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; animation:sPop .5s cubic-bezier(.16,1,.3,1); }
+@keyframes sPop { 0%{transform:scale(0)} 50%{transform:scale(1.15)} 100%{transform:scale(1)} }
+.success-ring svg { width:36px; height:36px; color:var(--green); }
+.success-title { font-size:20px; font-weight:700; color:var(--t1); }
+.success-desc { font-size:13px; color:var(--t2); line-height:1.5; margin-top:6px; max-width:320px; margin-left:auto; margin-right:auto; }
+.metrics { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:20px; }
+.metric { padding:14px; border-radius:var(--r-md); background:var(--s0); text-align:center; }
+.metric-val { font-size:20px; font-weight:700; color:var(--navy); font-family:var(--mono); }
+.metric-label { font-size:10px; color:var(--t3); margin-top:1px; text-transform:uppercase; letter-spacing:.4px; font-weight:500; }
+
+/* ─── CHAT ─── */
+.chat-msgs { padding:16px; display:flex; flex-direction:column; gap:12px; }
+.bubble { max-width:82%; padding:12px 14px; border-radius:16px; font-size:13px; line-height:1.5; animation:bubIn .35s cubic-bezier(.16,1,.3,1); }
+@keyframes bubIn { from{opacity:0;transform:translateY(6px) scale(.96)} to{opacity:1;transform:translateY(0) scale(1)} }
+.bubble.ai { align-self:flex-start; background:var(--s0); color:var(--t1); border-bottom-left-radius:4px; }
+.bubble.usr { align-self:flex-end; background:var(--navy); color:#fff; border-bottom-right-radius:4px; }
+.bub-label { font-size:9px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; color:var(--accent); margin-bottom:4px; }
+.bubble.ai strong { color:var(--navy); }
+.qreplies { display:flex; flex-wrap:wrap; gap:6px; padding:0 16px; }
+.qr { padding:7px 12px; border-radius:100px; border:1.5px solid var(--s3); background:var(--s1); font-family:var(--font); font-size:12px; font-weight:500; color:var(--t1); cursor:pointer; transition:all .2s; }
+.qr:hover { border-color:var(--light-blue); background:rgba(0,57,166,.02); }
+
+/* ─── INPUT BAR ─── */
+.inbar { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; padding:10px 16px; padding-bottom:max(10px, env(safe-area-inset-bottom)); background:rgba(255,255,255,.92); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-top:1px solid var(--s2); display:flex; align-items:center; gap:8px; z-index:100; }
+.inbar.hide { display:none; }
+.chat-in { flex:1; padding:10px 14px; border-radius:100px; border:1.5px solid var(--s3); background:var(--s0); font-family:var(--font); font-size:13px; color:var(--t1); outline:none; transition:all .2s; }
+.chat-in:focus { border-color:var(--blue); background:var(--s1); }
+.send-btn { width:40px; height:40px; border-radius:50%; border:none; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .2s; flex-shrink:0; }
+.send-btn:hover { background:var(--blue); transform:scale(1.05); }
+
+/* ─── TYPING ─── */
+.typing { display:flex; gap:3px; padding:2px 0; }
+.tdot { width:6px; height:6px; border-radius:50%; background:var(--t3); animation:tBounce 1.4s infinite; }
+.tdot:nth-child(2){animation-delay:.2s} .tdot:nth-child(3){animation-delay:.4s}
+@keyframes tBounce { 0%,80%,100%{transform:translateY(0);opacity:.4} 40%{transform:translateY(-5px);opacity:1} }
+
+/* ─── DEVICE INFO CARD ─── */
+.devcard { margin:0 16px 12px; padding:14px; border-radius:var(--r-md); border:1px solid var(--s2); background:var(--s1); }
+.devcard-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.devcard-name { font-size:13px; font-weight:600; color:var(--t1); }
+.devcard-status { font-size:10px; font-weight:600; padding:3px 8px; border-radius:100px; }
+.devcard-status.online { background:#ECFDF5; color:var(--green); }
+.devcard-status.offline { background:#FEF2F2; color:var(--red); }
+.devcard-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.devcard-item {}
+.devcard-val { font-size:14px; font-weight:700; color:var(--navy); font-family:var(--mono); }
+.devcard-label { font-size:9px; color:var(--t3); text-transform:uppercase; letter-spacing:.3px; margin-top:1px; }
+
+/* ─── CONNECTED DEVICES LIST ─── */
+.devlist { padding:0 16px; }
+.devrow { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--s2); }
+.devrow:last-child { border-bottom:none; }
+.dev-icon { width:30px; height:30px; border-radius:8px; background:var(--s0); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+.dev-info { flex:1; min-width:0; }
+.dev-name { font-size:12px; font-weight:600; color:var(--t1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dev-meta { font-size:10px; color:var(--t3); }
+.dev-signal { text-align:right; }
+.dev-dbm { font-size:11px; font-weight:600; font-family:var(--mono); }
+.dev-dbm.strong { color:var(--green); }
+.dev-dbm.medium { color:var(--amber); }
+.dev-dbm.weak { color:var(--red); }
+.dev-band { font-size:9px; color:var(--t3); }
+
+/* ─── TABS ─── */
+.tabs { display:flex; gap:0; padding:0 16px; border-bottom:1px solid var(--s2); }
+.tab { padding:10px 14px; font-family:var(--font); font-size:12px; font-weight:600; color:var(--t3); cursor:pointer; border:none; background:none; border-bottom:2px solid transparent; transition:all .2s; }
+.tab.on { color:var(--navy); border-bottom-color:var(--navy); }
+
+/* ─── SCENARIO SWITCHER (debug) ─── */
+.scenarios { position:fixed; bottom:16px; right:16px; z-index:200; }
+.sc-toggle { width:40px; height:40px; border-radius:50%; background:var(--navy); border:2px solid var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; box-shadow:var(--sh-lg); transition:all .2s; }
+.sc-toggle:hover { transform:scale(1.1); }
+.sc-panel { position:absolute; bottom:52px; right:0; width:260px; background:var(--s1); border-radius:var(--r-md); box-shadow:var(--sh-lg); border:1px solid var(--s2); overflow:hidden; display:none; }
+.sc-panel.open { display:block; animation:bubIn .3s cubic-bezier(.16,1,.3,1); }
+.sc-header { padding:10px 14px; background:var(--navy); color:#fff; font-size:11px; font-weight:600; letter-spacing:.3px; }
+.sc-item { padding:8px 14px; font-size:12px; color:var(--t1); cursor:pointer; border-bottom:1px solid var(--s2); display:flex; align-items:center; gap:8px; transition:background .15s; }
+.sc-item:hover { background:var(--s0); }
+.sc-item:last-child { border-bottom:none; }
+.sc-item .sc-num { font-size:10px; font-weight:700; color:var(--t3); font-family:var(--mono); width:18px; }
+.sc-item.active { background:rgba(0,212,170,.06); color:var(--navy); font-weight:600; }
+.sc-item.active::after { content:'✓'; margin-left:auto; color:var(--accent); font-weight:700; }
+
+/* ─── SATISFACTION ─── */
+.stars { display:flex; gap:6px; justify-content:center; margin-top:16px; }
+.star { width:36px; height:36px; border-radius:10px; border:1.5px solid var(--s3); background:var(--s1); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; transition:all .2s; }
+.star:hover, .star.lit { border-color:var(--amber); background:#FFF8F0; transform:scale(1.1); }
+
+/* ─── UTILITY ─── */
+.mt8{margin-top:8px} .mt12{margin-top:12px} .mt16{margin-top:16px} .mt20{margin-top:20px}
+.ph16{padding-left:16px;padding-right:16px}
+.hidden{display:none!important}
+@media(max-width:430px){ .shell{max-width:100%} .inbar{max-width:100%} }
+</style>
+</head>
+<body>
+
+<div class="shell">
+<!-- ═══ HEADER ═══ -->
+<div class="hdr">
+  <div class="hdr-l">
+    <button class="btn-back hide" id="backBtn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div class="hdr-info">
+      <div class="hdr-title" id="hdrTitle">Swisscom Support</div>
+      <div class="hdr-sub">AI Concierge</div>
+    </div>
+  </div>
+  <div class="hdr-r">
+    <button class="btn-icon" title="Language"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></button>
+    <button class="btn-icon" title="More"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main" id="main">
+
+<!-- ════════════════ HOME ════════════════ -->
+<div class="scr on" id="s-home">
+  <div class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="greet">Hoi Paul 👋</div>
+        <div class="greet-sub">What can I help you fix today?</div>
+      </div>
+      <div class="avatar-ring">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7z"/><path d="M18.5 19.5c0-3-2.5-4.5-6.5-4.5s-6.5 1.5-6.5 4.5"/></svg>
+        <div class="avatar-pulse"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detected Issue -->
+  <div class="detect" onclick="go('s-inet-diag')">
+    <div class="detect-top">
+      <div class="detect-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+      <div class="detect-title">WiFi Interference Detected</div>
+    </div>
+    <div class="detect-desc">Your 2.4 GHz channel has 14 competing networks. This is likely causing slowdowns. I can optimize this remotely.</div>
+    <div class="detect-cta">Auto-fix now <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+  </div>
+
+  <!-- Smart Input -->
+  <div class="sinput">
+    <div class="sinput-label">Describe your issue</div>
+    <div class="sinput-wrap">
+      <input type="text" class="sinput-field" placeholder="e.g. My TV keeps buffering..." id="smartIn">
+      <button class="sinput-btn" onclick="handleSmart()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+    </div>
+    <div class="sinput-hints">
+      <span class="sinput-hint" onclick="setInput('WiFi is slow upstairs')">📶 WiFi slow</span>
+      <span class="sinput-hint" onclick="setInput('TV picture keeps freezing')">📺 TV freezing</span>
+      <span class="sinput-hint" onclick="setInput('No 5G on my phone')">📱 No 5G</span>
+      <span class="sinput-hint" onclick="setInput('Internet not working')">🚫 No internet</span>
+    </div>
+  </div>
+
+  <!-- Products -->
+  <div class="sec-label">Your Products</div>
+  <div class="prod-grid">
+    <div class="prod" onclick="go('s-inet-flow')">
+      <div class="prod-badge"></div>
+      <div class="prod-ico inet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
+      <div class="prod-name">Internet</div>
+      <div class="prod-plan">Internet Box 3</div>
+      <div class="prod-status"><div class="status-dot warn"></div><span class="status-text">Interference detected</span></div>
+    </div>
+    <div class="prod" onclick="go('s-tv-flow')">
+      <div class="prod-ico tv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg></div>
+      <div class="prod-name">blue TV</div>
+      <div class="prod-plan">TV Box</div>
+      <div class="prod-status"><div class="status-dot ok"></div><span class="status-text">All good</span></div>
+    </div>
+    <div class="prod" onclick="go('s-mob-flow')">
+      <div class="prod-ico mob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+      <div class="prod-name">Mobile</div>
+      <div class="prod-plan">iPhone 15 Pro</div>
+      <div class="prod-status"><div class="status-dot ok"></div><span class="status-text">5G connected</span></div>
+    </div>
+    <div class="prod" onclick="go('s-land-flow')">
+      <div class="prod-ico land"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+      <div class="prod-name">Landline</div>
+      <div class="prod-plan">+41 21 XXX XX XX</div>
+      <div class="prod-status"><div class="status-dot ok"></div><span class="status-text">Registered</span></div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="sec-label">Quick Actions</div>
+  <div class="qactions">
+    <div class="qaction" onclick="go('s-inet-devices')"><div class="qaction-ico">🖥️</div><div><div class="qaction-text">Connected Devices</div><div class="qaction-sub">12 active</div></div></div>
+    <div class="qaction" onclick="go('s-speedtest')"><div class="qaction-ico">⚡</div><div><div class="qaction-text">Speed Test</div><div class="qaction-sub">Run now</div></div></div>
+    <div class="qaction" onclick="go('s-chat')"><div class="qaction-ico">🤖</div><div><div class="qaction-text">Ask AI</div><div class="qaction-sub">Free chat</div></div></div>
+    <div class="qaction"><div class="qaction-ico">📋</div><div><div class="qaction-text">My Tickets</div><div class="qaction-sub">0 open</div></div></div>
+  </div>
+
+  <!-- Escalation -->
+  <div class="escalate">
+    <div class="escalate-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+    <div class="escalate-text"><div class="escalate-title">Talk to a human</div><div class="escalate-desc">Average wait ~4 min</div></div>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8C95A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </div>
+</div>
+
+<!-- ════════════════ INTERNET FLOW ════════════════ -->
+<div class="scr" id="s-inet-flow">
+  <div class="prog"><div class="prog-fill" style="width:25%"></div></div>
+  <div class="fhdr">
+    <div class="crumbs"><span class="crumb">Internet</span><span class="crumb-sep">›</span><span class="crumb act">Issue Type</span></div>
+    <div class="fhdr-title">What's going on with your Internet?</div>
+    <div class="fhdr-sub">Select the best match — I'll run the right diagnostics.</div>
+  </div>
+  <div class="opts">
+    <div class="opt" onclick="go('s-inet-diag')"><div class="opt-emoji">📶</div><div class="opt-body"><div class="opt-title">WiFi is slow or unstable</div><div class="opt-desc">Pages load slowly, streaming buffers, signal drops</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="opt" onclick="go('s-inet-noconn')"><div class="opt-emoji">🚫</div><div class="opt-body"><div class="opt-title">No Internet at all</div><div class="opt-desc">Nothing connects, all devices affected</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="opt" onclick="go('s-inet-diag')"><div class="opt-emoji">🔌</div><div class="opt-body"><div class="opt-title">Router lights look wrong</div><div class="opt-desc">Blinking red, no power, unusual LED pattern</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="opt" onclick="go('s-inet-diag')"><div class="opt-emoji">🐌</div><div class="opt-body"><div class="opt-title">Speed doesn't match my plan</div><div class="opt-desc">Paying for 100 Mbps but getting much less</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="opt" onclick="go('s-chat')"><div class="opt-emoji">💬</div><div class="opt-body"><div class="opt-title">Something else</div><div class="opt-desc">Describe your issue to the AI Concierge</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+  </div>
+  <div class="modes"><button class="mode-btn on">📋 Guided Steps</button><button class="mode-btn" onclick="go('s-chat')">💬 Chat with AI</button></div>
+</div>
+
+<!-- ════════════════ INTERNET DIAGNOSTICS ════════════════ -->
+<div class="scr" id="s-inet-diag">
+  <div class="prog"><div class="prog-fill" style="width:50%"></div></div>
+  <div class="fhdr">
+    <div class="crumbs"><span class="crumb">Internet</span><span class="crumb-sep">›</span><span class="crumb">WiFi Slow</span><span class="crumb-sep">›</span><span class="crumb act">Diagnosis</span></div>
+    <div class="fhdr-title">Running diagnostics...</div>
+    <div class="fhdr-sub">Checking your Internet Box 3 right now.</div>
+  </div>
+
+  <!-- Device Card -->
+  <div class="devcard mt16">
+    <div class="devcard-top">
+      <div class="devcard-name">Internet Box 3</div>
+      <div class="devcard-status online">Online</div>
+    </div>
+    <div class="devcard-grid">
+      <div class="devcard-item"><div class="devcard-val">14d</div><div class="devcard-label">Uptime</div></div>
+      <div class="devcard-item"><div class="devcard-val">11.04.02</div><div class="devcard-label">Firmware</div></div>
+      <div class="devcard-item"><div class="devcard-val">23%</div><div class="devcard-label">CPU</div></div>
+    </div>
+  </div>
+
+  <div class="diag">
+    <div class="checks">
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">Line signal quality (VDSL2)</span><span class="chk-val pass">SNR 6.2 dB</span></div>
+      <div class="chk"><div class="chk-ico fail"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div><span class="chk-label">WiFi channel congestion (2.4 GHz)</span><span class="chk-val fail">14 networks</span></div>
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">DNS resolution</span><span class="chk-val pass">12ms</span></div>
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">Speed test (download)</span><span class="chk-val pass">94.3 Mbps</span></div>
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">Speed test (upload)</span><span class="chk-val pass">38.7 Mbps</span></div>
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">Packet loss</span><span class="chk-val pass">0.1%</span></div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-badge">AI Insight</div>
+    <div class="insight-text">Your WiFi channel 6 (2.4 GHz) has <strong>14 competing networks</strong>. Channel 1 only has 2. I can switch automatically — your WiFi will briefly disconnect for ~15 seconds.</div>
+  </div>
+
+  <div class="actions">
+    <button class="abtn acc" onclick="go('s-inet-repair')">🔧 Auto-fix WiFi channel</button>
+    <button class="abtn sec" onclick="go('s-chat')">Let me ask the AI about this</button>
+    <button class="abtn gho">Show me how to fix it myself</button>
+  </div>
+</div>
+
+<!-- ════════════════ INTERNET NO CONNECTION ════════════════ -->
+<div class="scr" id="s-inet-noconn">
+  <div class="prog"><div class="prog-fill" style="width:50%"></div></div>
+  <div class="fhdr">
+    <div class="crumbs"><span class="crumb">Internet</span><span class="crumb-sep">›</span><span class="crumb">No Connection</span><span class="crumb-sep">›</span><span class="crumb act">Checking</span></div>
+    <div class="fhdr-title">Checking your connection...</div>
+    <div class="fhdr-sub">Let me see what's happening on your line.</div>
+  </div>
+  <div class="diag">
+    <div class="diag-card">
+      <div class="diag-label">Network Status</div>
+      <div class="diag-title">⚠️ Area Outage Detected</div>
+      <div class="diag-desc">Lausanne 1003 · Affecting ~4,200 customers</div>
+    </div>
+    <div class="checks">
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">Router is powered on</span><span class="chk-val pass">Yes</span></div>
+      <div class="chk"><div class="chk-ico fail"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div><span class="chk-label">WAN connection</span><span class="chk-val fail">Down</span></div>
+      <div class="chk"><div class="chk-ico fail"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div><span class="chk-label">Known outage in your area</span><span class="chk-val fail">Active</span></div>
+    </div>
+  </div>
+  <div class="insight warn">
+    <div class="insight-badge">Outage Info</div>
+    <div class="insight-text">A fiber cut on the Lausanne–Bern backbone is affecting your area. Engineers are on-site. <strong>Expected resolution: today by 15:45</strong>. Your connection will restore automatically.</div>
+  </div>
+  <div class="actions">
+    <button class="abtn pri">🔔 Notify me when it's fixed</button>
+    <button class="abtn sec">View outage map</button>
+    <button class="abtn gho" onclick="go('s-chat')">I still have questions</button>
+  </div>
+</div>
+
+<!-- ════════════════ INTERNET REPAIR ════════════════ -->
+<div class="scr" id="s-inet-repair">
+  <div class="prog"><div class="prog-fill" style="width:75%"></div></div>
+  <div class="fhdr">
+    <div class="crumbs"><span class="crumb">Internet</span><span class="crumb-sep">›</span><span class="crumb">WiFi Slow</span><span class="crumb-sep">›</span><span class="crumb act">Repair</span></div>
+    <div class="fhdr-title">Optimizing your WiFi</div>
+    <div class="fhdr-sub">Keep your router powered on during this process.</div>
+  </div>
+  <div class="mt16"></div>
+  <div class="repair">
+    <div class="repair-hdr"><div class="repair-ico wifi">🔧</div><div><div class="repair-title">WiFi Channel Optimization</div><div class="repair-desc">Remote repair in progress</div></div></div>
+    <div class="repair-steps">
+      <div class="rstep"><div class="snum done">✓</div><div class="scontent"><div class="stitle">Scanning available channels</div><div class="sdetail">14 networks found on ch. 6</div></div></div>
+      <div class="rstep"><div class="snum done">✓</div><div class="scontent"><div class="stitle">Selecting optimal channel</div><div class="sdetail">Channel 1 — only 2 competing networks</div></div></div>
+      <div class="rstep"><div class="snum act">3</div><div class="scontent"><div class="stitle">Applying new configuration</div><div class="sdetail"><div class="typing"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div></div></div></div>
+      <div class="rstep"><div class="snum wait">4</div><div class="scontent"><div class="stitle">Enabling 5 GHz band optimization</div><div class="sdetail">Waiting...</div></div></div>
+      <div class="rstep"><div class="snum wait">5</div><div class="scontent"><div class="stitle">Verifying connection</div><div class="sdetail">Will run speed test after reconnect</div></div></div>
+    </div>
+  </div>
+  <div class="insight mt16">
+    <div class="insight-badge">Live</div>
+    <div class="insight-text">Your WiFi will briefly disconnect as the channel switches. All devices will reconnect automatically within <strong>10–15 seconds</strong>.</div>
+  </div>
+  <div class="actions"><button class="abtn pri" onclick="go('s-inet-success')">Complete — View Results</button></div>
+</div>
+
+<!-- ════════════════ INTERNET SUCCESS ════════════════ -->
+<div class="scr" id="s-inet-success">
+  <div class="prog"><div class="prog-fill" style="width:100%"></div></div>
+  <div class="success">
+    <div class="success-ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="success-title">WiFi Optimized ✨</div>
+    <div class="success-desc">Channel switched to 1 (2.4 GHz) and 5 GHz band steering enabled. Here's the improvement:</div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-val">↓82%</div><div class="metric-label">Less Interference</div></div>
+      <div class="metric"><div class="metric-val">+47%</div><div class="metric-label">Speed Increase</div></div>
+      <div class="metric"><div class="metric-val">4ms</div><div class="metric-label">Latency (was 28)</div></div>
+      <div class="metric"><div class="metric-val">0%</div><div class="metric-label">Packet Loss</div></div>
+    </div>
+    <div class="stars"><div class="star" onclick="rateStar(this)">⭐</div><div class="star" onclick="rateStar(this)">⭐</div><div class="star" onclick="rateStar(this)">⭐</div><div class="star" onclick="rateStar(this)">⭐</div><div class="star" onclick="rateStar(this)">⭐</div></div>
+  </div>
+  <div class="insight">
+    <div class="insight-badge">Recommendation</div>
+    <div class="insight-text">Your router is near a microwave — 2.4 GHz signals are affected by microwave radiation. Moving it <strong>~1 meter away</strong> would improve stability further.</div>
+  </div>
+  <div class="actions">
+    <button class="abtn pri" onclick="go('s-home')">Done — back to home</button>
+    <button class="abtn gho" onclick="go('s-chat')">I still have issues — chat with AI</button>
+  </div>
+</div>
+
+<!-- ════════════════ CONNECTED DEVICES ════════════════ -->
+<div class="scr" id="s-inet-devices">
+  <div class="fhdr">
+    <div class="crumbs"><span class="crumb">Internet</span><span class="crumb-sep">›</span><span class="crumb act">Connected Devices</span></div>
+    <div class="fhdr-title">12 Devices Connected</div>
+    <div class="fhdr-sub">8 via WiFi · 3 via Ethernet · 1 weak signal</div>
+  </div>
+  <div class="tabs"><button class="tab on">All (12)</button><button class="tab">WiFi (8)</button><button class="tab">Ethernet (3)</button><button class="tab">Weak (1)</button></div>
+  <div class="devlist">
+    <div class="devrow"><div class="dev-icon">📱</div><div class="dev-info"><div class="dev-name">Pauls-iPhone</div><div class="dev-meta">192.168.1.101 · 5GHz</div></div><div class="dev-signal"><div class="dev-dbm strong">-38 dBm</div><div class="dev-band">866 Mbps</div></div></div>
+    <div class="devrow"><div class="dev-icon">💻</div><div class="dev-info"><div class="dev-name">MacBook-Pro</div><div class="dev-meta">192.168.1.103 · 5GHz</div></div><div class="dev-signal"><div class="dev-dbm strong">-45 dBm</div><div class="dev-band">780 Mbps</div></div></div>
+    <div class="devrow"><div class="dev-icon">💻</div><div class="dev-info"><div class="dev-name">Work-Laptop</div><div class="dev-meta">192.168.1.105 · 5GHz</div></div><div class="dev-signal"><div class="dev-dbm strong">-42 dBm</div><div class="dev-band">866 Mbps</div></div></div>
+    <div class="devrow"><div class="dev-icon">📺</div><div class="dev-info"><div class="dev-name">TV-Box</div><div class="dev-meta">192.168.1.102 · Ethernet port 1</div></div><div class="dev-signal"><div class="dev-dbm strong">—</div><div class="dev-band">1 Gbps</div></div></div>
+    <div class="devrow"><div class="dev-icon">🎮</div><div class="dev-info"><div class="dev-name">PlayStation-5</div><div class="dev-meta">192.168.1.120 · Ethernet port 2</div></div><div class="dev-signal"><div class="dev-dbm strong">—</div><div class="dev-band">1 Gbps</div></div></div>
+    <div class="devrow"><div class="dev-icon">🔆</div><div class="dev-info"><div class="dev-name">Philips-Hue-Bridge</div><div class="dev-meta">192.168.1.141 · Ethernet port 3</div></div><div class="dev-signal"><div class="dev-dbm strong">—</div><div class="dev-band">100 Mbps</div></div></div>
+    <div class="devrow"><div class="dev-icon">🔊</div><div class="dev-info"><div class="dev-name">Sonos-Living-Room</div><div class="dev-meta">192.168.1.110 · 2.4GHz</div></div><div class="dev-signal"><div class="dev-dbm medium">-52 dBm</div><div class="dev-band">72 Mbps</div></div></div>
+    <div class="devrow"><div class="dev-icon">📱</div><div class="dev-info"><div class="dev-name">iPad-Kitchen</div><div class="dev-meta">192.168.1.131 · 5GHz</div></div><div class="dev-signal"><div class="dev-dbm medium">-55 dBm</div><div class="dev-band">433 Mbps</div></div></div>
+    <div class="devrow"><div class="dev-icon">🖨️</div><div class="dev-info"><div class="dev-name">HP-LaserJet</div><div class="dev-meta">192.168.1.140 · 2.4GHz</div></div><div class="dev-signal"><div class="dev-dbm medium">-58 dBm</div><div class="dev-band">72 Mbps</div></div></div>
+    <div class="devrow"><div class="dev-icon">🌡️</div><div class="dev-info"><div class="dev-name">Nest-Thermostat</div><div class="dev-meta">192.168.1.115 · 2.4GHz</div></div><div class="dev-signal"><div class="dev-dbm medium">-61 dBm</div><div class="dev-band">54 Mbps</div></div></div>
+    <div class="devrow"><div class="dev-icon">🚪</div><div class="dev-info"><div class="dev-name">Ring-Doorbell</div><div class="dev-meta">192.168.1.116 · 2.4GHz</div></div><div class="dev-signal"><div class="dev-dbm medium">-67 dBm</div><div class="dev-band">54 Mbps</div></div></div>
+    <div class="devrow"><div class="dev-icon">📱</div><div class="dev-info"><div class="dev-name">Guest-Phone</div><div class="dev-meta">192.168.1.200 · 2.4GHz</div></div><div class="dev-signal"><div class="dev-dbm weak">-70 dBm</div><div class="dev-band">36 Mbps ⚠️</div></div></div>
+  </div>
+</div>
+
+<!-- ════════════════ SPEED TEST ════════════════ -->
+<div class="scr" id="s-speedtest">
+  <div class="fhdr">
+    <div class="crumbs"><span class="crumb">Internet</span><span class="crumb-sep">›</span><span class="crumb act">Speed Test</span></div>
+    <div class="fhdr-title">Speed Test Results</div>
+    <div class="fhdr-sub">Tested from Internet Box 3 → Zurich</div>
+  </div>
+  <div class="devcard mt16">
+    <div class="devcard-top"><div class="devcard-name">Download</div><div class="devcard-status online">94% of plan</div></div>
+    <div style="text-align:center;padding:8px 0"><span style="font-size:42px;font-weight:700;color:var(--navy);font-family:var(--mono)">94.3</span><span style="font-size:16px;color:var(--t2);margin-left:4px">Mbps</span></div>
+    <div style="height:6px;background:var(--s2);border-radius:3px;overflow:hidden"><div style="width:94%;height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:3px"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-top:4px"><span style="font-size:10px;color:var(--t3)">0</span><span style="font-size:10px;color:var(--t3)">Plan: 100 Mbps</span></div>
+  </div>
+  <div class="devcard">
+    <div class="devcard-top"><div class="devcard-name">Upload</div><div class="devcard-status online">97% of plan</div></div>
+    <div style="text-align:center;padding:8px 0"><span style="font-size:42px;font-weight:700;color:var(--navy);font-family:var(--mono)">38.7</span><span style="font-size:16px;color:var(--t2);margin-left:4px">Mbps</span></div>
+    <div style="height:6px;background:var(--s2);border-radius:3px;overflow:hidden"><div style="width:97%;height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:3px"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-top:4px"><span style="font-size:10px;color:var(--t3)">0</span><span style="font-size:10px;color:var(--t3)">Plan: 40 Mbps</span></div>
+  </div>
+  <div class="devcard">
+    <div class="devcard-grid">
+      <div class="devcard-item"><div class="devcard-val">4.2</div><div class="devcard-label">Latency (ms)</div></div>
+      <div class="devcard-item"><div class="devcard-val">0.8</div><div class="devcard-label">Jitter (ms)</div></div>
+      <div class="devcard-item"><div class="devcard-val">0.1%</div><div class="devcard-label">Packet Loss</div></div>
+    </div>
+  </div>
+  <div class="insight">
+    <div class="insight-badge">AI Insight</div>
+    <div class="insight-text">Your speeds are <strong>excellent</strong> — 94% downstream and 97% upstream efficiency. The slight gap is normal for VDSL2 overhead. No issues found at the connection level.</div>
+  </div>
+  <div class="actions"><button class="abtn sec" onclick="go('s-home')">Back to home</button></div>
+</div>
+
+<!-- ════════════════ TV FLOW ════════════════ -->
+<div class="scr" id="s-tv-flow">
+  <div class="prog"><div class="prog-fill" style="width:25%"></div></div>
+  <div class="fhdr">
+    <div class="crumbs"><span class="crumb">blue TV</span><span class="crumb-sep">›</span><span class="crumb act">Issue Type</span></div>
+    <div class="fhdr-title">What's wrong with your TV?</div>
+    <div class="fhdr-sub">I'll check your TV Box and streaming quality.</div>
+  </div>
+  <div class="opts">
+    <div class="opt" onclick="go('s-tv-diag')"><div class="opt-emoji">🧊</div><div class="opt-body"><div class="opt-title">Picture freezes or pixelates</div><div class="opt-desc">Image breaks up, buffering wheel appears</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="opt" onclick="go('s-tv-diag')"><div class="opt-emoji">🔇</div><div class="opt-body"><div class="opt-title">No sound</div><div class="opt-desc">Picture works but audio is missing or crackling</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="opt" onclick="go('s-tv-diag')"><div class="opt-emoji">⬛</div><div class="opt-body"><div class="opt-title">No picture at all</div><div class="opt-desc">TV screen is black, no signal message</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="opt" onclick="go('s-tv-diag')"><div class="opt-emoji">⏺️</div><div class="opt-body"><div class="opt-title">Recording not working</div><div class="opt-desc">Scheduled recordings fail or playback issues</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="opt" onclick="go('s-tv-diag')"><div class="opt-emoji">📰</div><div class="opt-body"><div class="opt-title">Program guide is empty</div><div class="opt-desc">EPG shows no data, channels missing</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="opt" onclick="go('s-chat')"><div class="opt-emoji">💬</div><div class="opt-body"><div class="opt-title">Something else</div><div class="opt-desc">Describe your TV issue to the AI</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+  </div>
+  <div class="modes"><button class="mode-btn on">📋 Guided Steps</button><button class="mode-btn" onclick="go('s-chat')">💬 Chat with AI</button></div>
+</div>
+
+<!-- ════════════════ TV DIAGNOSTICS ════════════════ -->
+<div class="scr" id="s-tv-diag">
+  <div class="prog"><div class="prog-fill" style="width:55%"></div></div>
+  <div class="fhdr">
+    <div class="crumbs"><span class="crumb">blue TV</span><span class="crumb-sep">›</span><span class="crumb">Buffering</span><span class="crumb-sep">›</span><span class="crumb act">Diagnosis</span></div>
+    <div class="fhdr-title">Checking your TV Box...</div>
+  </div>
+  <div class="devcard mt16">
+    <div class="devcard-top"><div class="devcard-name">TV Box (Arris)</div><div class="devcard-status online">Online</div></div>
+    <div class="devcard-grid">
+      <div class="devcard-item"><div class="devcard-val">72h</div><div class="devcard-label">Uptime</div></div>
+      <div class="devcard-item"><div class="devcard-val">48°C</div><div class="devcard-label">Temp</div></div>
+      <div class="devcard-item"><div class="devcard-val">37%</div><div class="devcard-label">Disk</div></div>
+    </div>
+  </div>
+  <div class="diag">
+    <div class="checks">
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">TV Box firmware</span><span class="chk-val pass">v8.2.14 ✓</span></div>
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">Connection type</span><span class="chk-val pass">Ethernet 1Gbps</span></div>
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">IPTV stream quality</span><span class="chk-val pass">0.02% loss</span></div>
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">HDMI output (4K HDR)</span><span class="chk-val pass">3840×2160</span></div>
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">DVR storage</span><span class="chk-val pass">313 GB free</span></div>
+    </div>
+  </div>
+  <div class="insight">
+    <div class="insight-badge">AI Insight</div>
+    <div class="insight-text">Everything looks <strong>healthy</strong> on your TV Box. Stream quality is excellent (0.02% packet loss), HDMI is running at 4K HDR, and you have plenty of recording space. If the issue persists, try a power cycle of both TV and TV Box.</div>
+  </div>
+  <div class="actions">
+    <button class="abtn sec">🔄 Restart TV Box remotely</button>
+    <button class="abtn sec">🗑️ Clear cache & refresh EPG</button>
+    <button class="abtn gho" onclick="go('s-home')">Looks fine — go back</button>
+  </div>
+</div>
+
+<!-- ════════════════ MOBILE FLOW ════════════════ -->
+<div class="scr" id="s-mob-flow">
+  <div class="prog"><div class="prog-fill" style="width:25%"></div></div>
+  <div class="fhdr">
+    <div class="crumbs"><span class="crumb">Mobile</span><span class="crumb-sep">›</span><span class="crumb act">Issue Type</span></div>
+    <div class="fhdr-title">What's the issue with Mobile?</div>
+    <div class="fhdr-sub">I can check your signal and push settings remotely.</div>
+  </div>
+  <div class="devcard mt16">
+    <div class="devcard-top"><div class="devcard-name">iPhone 15 Pro · inOne mobile go</div><div class="devcard-status online">5G NR</div></div>
+    <div class="devcard-grid">
+      <div class="devcard-item"><div class="devcard-val">-87</div><div class="devcard-label">RSRP (dBm)</div></div>
+      <div class="devcard-item"><div class="devcard-val">n78</div><div class="devcard-label">Band</div></div>
+      <div class="devcard-item"><div class="devcard-val">23.7 GB</div><div class="devcard-label">Used (∞)</div></div>
+    </div>
+  </div>
+  <div class="opts">
+    <div class="opt" onclick="go('s-mob-diag')"><div class="opt-emoji">📵</div><div class="opt-body"><div class="opt-title">No signal or weak signal</div><div class="opt-desc">Can't make calls, no data connection</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="opt" onclick="go('s-mob-diag')"><div class="opt-emoji">5️⃣</div><div class="opt-body"><div class="opt-title">5G not connecting</div><div class="opt-desc">Stuck on 4G even though 5G should work</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="opt" onclick="go('s-mob-diag')"><div class="opt-emoji">✈️</div><div class="opt-body"><div class="opt-title">Roaming not working</div><div class="opt-desc">Data or calls don't work abroad</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="opt" onclick="go('s-mob-diag')"><div class="opt-emoji">📞</div><div class="opt-body"><div class="opt-title">Voicemail issues</div><div class="opt-desc">Can't access voicemail or set it up</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="opt" onclick="go('s-chat')"><div class="opt-emoji">💬</div><div class="opt-body"><div class="opt-title">Something else</div><div class="opt-desc">Describe your mobile issue to the AI</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+  </div>
+</div>
+
+<!-- ════════════════ MOBILE DIAG ════════════════ -->
+<div class="scr" id="s-mob-diag">
+  <div class="prog"><div class="prog-fill" style="width:60%"></div></div>
+  <div class="fhdr">
+    <div class="crumbs"><span class="crumb">Mobile</span><span class="crumb-sep">›</span><span class="crumb">5G</span><span class="crumb-sep">›</span><span class="crumb act">Diagnosis</span></div>
+    <div class="fhdr-title">Checking mobile network...</div>
+  </div>
+  <div class="diag">
+    <div class="checks">
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">Plan includes 5G</span><span class="chk-val pass">inOne go ✓</span></div>
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">Device supports 5G</span><span class="chk-val pass">iPhone 15 Pro ✓</span></div>
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">5G coverage at your location</span><span class="chk-val pass">Indoor OK</span></div>
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">Current connection</span><span class="chk-val pass">5G NR SA</span></div>
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">VoLTE active</span><span class="chk-val pass">Yes</span></div>
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">eSIM provisioning</span><span class="chk-val pass">Active</span></div>
+    </div>
+  </div>
+  <div class="insight">
+    <div class="insight-badge">AI Insight</div>
+    <div class="insight-text">Your mobile connection looks <strong>perfect</strong>. You're on 5G Standalone (SA) on band n78 with a signal strength of -87 dBm (good). VoLTE is active. If you're having intermittent issues, it may be location-specific — try toggling Airplane mode.</div>
+  </div>
+  <div class="actions">
+    <button class="abtn sec">📡 Push network settings</button>
+    <button class="abtn sec">📩 Send config SMS</button>
+    <button class="abtn gho" onclick="go('s-home')">All good — go back</button>
+  </div>
+</div>
+
+<!-- ════════════════ LANDLINE FLOW ════════════════ -->
+<div class="scr" id="s-land-flow">
+  <div class="prog"><div class="prog-fill" style="width:25%"></div></div>
+  <div class="fhdr">
+    <div class="crumbs"><span class="crumb">Landline</span><span class="crumb-sep">›</span><span class="crumb act">Issue Type</span></div>
+    <div class="fhdr-title">What's wrong with your Landline?</div>
+    <div class="fhdr-sub">VoIP runs through your Internet Box — I can check both.</div>
+  </div>
+  <div class="opts">
+    <div class="opt" onclick="go('s-land-diag')"><div class="opt-emoji">📞</div><div class="opt-body"><div class="opt-title">No dial tone</div><div class="opt-desc">Phone shows no connection, can't make or receive calls</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="opt" onclick="go('s-land-diag')"><div class="opt-emoji">🔊</div><div class="opt-body"><div class="opt-title">Call quality issues</div><div class="opt-desc">Echo, choppy audio, one-way audio, static</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="opt" onclick="go('s-land-diag')"><div class="opt-emoji">👤</div><div class="opt-body"><div class="opt-title">Caller ID not showing</div><div class="opt-desc">Incoming calls show no number or wrong number</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="opt" onclick="go('s-chat')"><div class="opt-emoji">💬</div><div class="opt-body"><div class="opt-title">Something else</div><div class="opt-desc">Describe your issue to the AI</div></div><svg class="opt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+  </div>
+</div>
+
+<!-- ════════════════ LANDLINE DIAG ════════════════ -->
+<div class="scr" id="s-land-diag">
+  <div class="prog"><div class="prog-fill" style="width:55%"></div></div>
+  <div class="fhdr">
+    <div class="crumbs"><span class="crumb">Landline</span><span class="crumb-sep">›</span><span class="crumb">No Dial Tone</span><span class="crumb-sep">›</span><span class="crumb act">Diagnosis</span></div>
+    <div class="fhdr-title">Checking VoIP registration...</div>
+  </div>
+  <div class="diag">
+    <div class="checks">
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">Internet connection</span><span class="chk-val pass">Online</span></div>
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">SIP registration</span><span class="chk-val pass">Registered</span></div>
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">Voice codec (G.722)</span><span class="chk-val pass">HD Voice ✓</span></div>
+      <div class="chk"><div class="chk-ico pass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="chk-label">Phone port detected</span><span class="chk-val pass">Port 1 active</span></div>
+    </div>
+  </div>
+  <div class="insight">
+    <div class="insight-badge">AI Insight</div>
+    <div class="insight-text">Your VoIP service is <strong>fully registered</strong> and using HD Voice (G.722 codec). If your physical phone has no dial tone, check that it's plugged into <strong>Port 1</strong> on the back of your Internet Box 3. The green phone icon should be lit.</div>
+  </div>
+  <div class="actions">
+    <button class="abtn sec">🔄 Re-register VoIP</button>
+    <button class="abtn sec" onclick="go('s-chat')">💬 Chat with AI about this</button>
+    <button class="abtn gho" onclick="go('s-home')">It's working now — go back</button>
+  </div>
+</div>
+
+<!-- ════════════════ CHAT ════════════════ -->
+<div class="scr" id="s-chat">
+  <div class="chat-msgs" id="chatMsgs">
+    <div class="bubble ai"><div class="bub-label">AI Concierge</div>I can see you're on the <strong>inOne home L</strong> plan with an Internet Box 3, TV Box, and iPhone 15 Pro. What's going on? Describe the problem in your own words — I have full diagnostic access to all your equipment.</div>
+    <div class="bubble usr">My kids say the WiFi is really slow in their rooms upstairs but it works fine down here in the living room</div>
+    <div class="bubble ai"><div class="bub-label">AI Concierge</div>That's a classic coverage issue. Your Internet Box is on the ground floor and the 5 GHz signal doesn't travel well through walls and floors. A few things I can do right now:<br><br><strong>1.</strong> Run a signal strength analysis across your devices (takes ~20 sec)<br><strong>2.</strong> Optimize your WiFi settings for better range<br><strong>3.</strong> Check if a <strong>WLAN Booster</strong> would solve the problem — I can recommend placement too</div>
+  </div>
+  <div class="qreplies" id="qReplies">
+    <button class="qr" onclick="qReply('Run the signal analysis')">📡 Run signal analysis</button>
+    <button class="qr" onclick="qReply('Tell me about the Booster')">📦 WLAN Booster info</button>
+    <button class="qr" onclick="qReply('Optimize my WiFi settings')">⚡ Optimize settings</button>
+    <button class="qr" onclick="qReply('Can we try all three?')">All of the above</button>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- INPUT BAR -->
+<div class="inbar hide" id="inBar">
+  <input type="text" class="chat-in" placeholder="Type your message..." id="chatIn" onkeydown="if(event.key==='Enter')sendMsg()">
+  <button class="send-btn" onclick="sendMsg()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+</div>
+
+</div><!-- /shell -->
+
+<!-- ═══ SCENARIO SWITCHER ═══ -->
+<div class="scenarios">
+  <button class="sc-toggle" onclick="toggleSc()" title="Demo Scenarios">🎛️</button>
+  <div class="sc-panel" id="scPanel">
+    <div class="sc-header">DEMO SCENARIOS</div>
+    <div class="sc-item active" onclick="loadSc(0)"><span class="sc-num">0</span> Default (WiFi interference)</div>
+    <div class="sc-item" onclick="loadSc(1)"><span class="sc-num">1</span> No Internet (outage)</div>
+    <div class="sc-item" onclick="loadSc(2)"><span class="sc-num">2</span> TV Buffering</div>
+    <div class="sc-item" onclick="loadSc(3)"><span class="sc-num">3</span> Mobile: No 5G</div>
+    <div class="sc-item" onclick="loadSc(4)"><span class="sc-num">4</span> Firmware update needed</div>
+    <div class="sc-item" onclick="loadSc(5)"><span class="sc-num">5</span> Recording failure (disk full)</div>
+    <div class="sc-item" onclick="loadSc(6)"><span class="sc-num">6</span> Line instability</div>
+    <div class="sc-item" onclick="loadSc(7)"><span class="sc-num">7</span> All systems healthy</div>
+  </div>
+</div>
+
+<script>
+// ─── NAVIGATION ───
+const hist = ['s-home'];
+const chatScreens = ['s-chat'];
+
+function go(id) {
+  document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  hist.push(id);
+  updateNav();
+  document.getElementById('main').scrollTop = 0;
+}
+
+function goBack() {
+  if (hist.length > 1) {
+    hist.pop();
+    const prev = hist[hist.length - 1];
+    document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+    document.getElementById(prev).classList.add('on');
+    updateNav();
+  }
+}
+
+function updateNav() {
+  const cur = hist[hist.length - 1];
+  document.getElementById('backBtn').classList.toggle('hide', hist.length <= 1);
+  document.getElementById('inBar').classList.toggle('hide', !chatScreens.includes(cur));
+}
+
+// ─── SMART INPUT ───
+function setInput(t) { document.getElementById('smartIn').value = t; }
+function handleSmart() {
+  const v = document.getElementById('smartIn').value.trim();
+  if (v) { go('s-chat'); setTimeout(() => addBubble(v, 'usr'), 150); }
+}
+
+// ─── CHAT ───
+function sendMsg() {
+  const inp = document.getElementById('chatIn');
+  const v = inp.value.trim();
+  if (!v) return;
+  addBubble(v, 'usr');
+  inp.value = '';
+  setTimeout(() => {
+    const t = addBubble('<div class="bub-label">AI Concierge</div><div class="typing"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>', 'ai', true);
+    setTimeout(() => {
+      t.innerHTML = '<div class="bub-label">AI Concierge</div>I understand. Let me run some checks on your equipment — give me a moment and I\'ll come back with what I find.';
+    }, 1800);
+  }, 400);
+}
+
+function qReply(text) {
+  addBubble(text, 'usr');
+  document.getElementById('qReplies').style.display = 'none';
+  document.getElementById('inBar').classList.remove('hide');
+  setTimeout(() => {
+    const t = addBubble('<div class="bub-label">AI Concierge</div><div class="typing"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>', 'ai', true);
+    setTimeout(() => {
+      t.innerHTML = '<div class="bub-label">AI Concierge</div>Running signal analysis now... I\'m measuring signal strength across all your connected devices.<br><br>Initial results: your <strong>Guest-Phone</strong> upstairs is getting only -70 dBm on 2.4 GHz — that\'s quite weak. The 5 GHz signal doesn\'t reach at all. A <strong>WLAN Booster</strong> placed midway on the staircase would extend coverage to the upper floor. Want me to show the details?';
+    }, 2200);
+  }, 400);
+}
+
+function addBubble(html, type, raw) {
+  const msgs = document.getElementById('chatMsgs');
+  const b = document.createElement('div');
+  b.className = 'bubble ' + type;
+  if (raw) b.innerHTML = html; else b.textContent = html;
+  msgs.appendChild(b);
+  msgs.scrollTop = msgs.scrollHeight;
+  return b;
+}
+
+// ─── STAR RATING ───
+function rateStar(el) {
+  const stars = el.parentElement.children;
+  const idx = Array.from(stars).indexOf(el);
+  Array.from(stars).forEach((s, i) => s.classList.toggle('lit', i <= idx));
+}
+
+// ─── SCENARIO SWITCHER ───
+function toggleSc() { document.getElementById('scPanel').classList.toggle('open'); }
+function loadSc(n) {
+  document.querySelectorAll('.sc-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.sc-item')[n].classList.add('active');
+  document.getElementById('scPanel').classList.remove('open');
+  // Reset to home
+  hist.length = 0;
+  hist.push('s-home');
+  document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+  document.getElementById('s-home').classList.add('on');
+  updateNav();
+}
+
+// ─── TAB SWITCHING ───
+document.querySelectorAll('.tabs').forEach(tabs => {
+  tabs.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+      tab.classList.add('on');
+    });
+  });
+});
+
+// ─── MODE TOGGLE ───
+document.querySelectorAll('.modes').forEach(m => {
+  m.querySelectorAll('.mode-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      m.querySelectorAll('.mode-btn').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+    });
+  });
+});
+</script>
+</body>
+</html>
